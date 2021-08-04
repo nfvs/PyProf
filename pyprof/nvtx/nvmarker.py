@@ -41,6 +41,7 @@ import traceback
 import math
 import json
 import importlib
+import inspect
 from .config import Config
 from .dlprof import DLProf
 from .dlprof import dprint
@@ -267,6 +268,12 @@ def add_wrapper(mod, fn_name):
                         f" last_callid {last_call_id} patch_list {dlprof.patch_list} ")
                 dlprof.call_id = dlprof.call_id + 1
         return result
+
+    # Copy the original func signature to the wrapper, so `inspect` works on it
+    try:
+        wrapper_func.__signature__ = inspect.signature(func)
+    except ValueError:
+        pass  # some callables may not be introspectable; skip those
 
     setattr(mod, fn_name, wrapper_func)
 
